@@ -1,0 +1,2 @@
+# Zigule
+for zig beginner
