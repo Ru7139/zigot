@@ -17,6 +17,12 @@ pub fn main() !void {
     const d2: u8 = 'B';
     try stdOut.print("d1 = {c}, d2 = {}\n", .{ d1, d2 });
 
+    const e = "Here is zig language";
+    try stdOut.print("e: type = {}\n", .{@TypeOf(e)});
+    try stdOut.print("e: length = {}\n", .{e.len});
+    try stdOut.print("e: content = {s}\n", .{e});
+    try stdOut.print("e: last character = {c}\n", .{e[e.len - 1]});
+
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
-    std.debug.print("Exec Done wiht --> {}ns\n", .{final_elapsed_time_ns});
+    std.debug.print("\nExec Done wiht --> {}ns\n", .{final_elapsed_time_ns});
 }
