@@ -37,7 +37,7 @@ pub fn main() !void {
     const vec2 = @Vector(6, u32){ 1, 3, 5, 7, 9, 11 };
     const vec3 = vec1 + vec2; // value will be added, same type as themselves
     try stdOut.print("\nvec3: type = {}\n", .{@TypeOf(vec3)});
-    try stdOut.print("vec3: len = {}\n", .{vec3.len});
+    try stdOut.print("vec3: len = {}\n", .{@typeInfo(@TypeOf(vec3)).vector.len});
     try stdOut.print("vec3 = {any}\n", .{vec3});
     // if add @Vector(6, u32) with @Vector(5, u32), it will get an error
     //      const vec3 = vec1 + vec2;
