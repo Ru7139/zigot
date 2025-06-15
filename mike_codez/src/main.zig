@@ -52,6 +52,13 @@ pub fn main() !void {
     point1.* = 50;
     try stdOut.print("\npoint1 = {d}\nvalue1 = {d}\n", .{ point1, value1 });
 
+    const array1 = [_]u32{ 2, 3, 4, 5, 6 };
+    const array2 = array1[1..4];
+    try stdOut.print("\n{}\n", .{@TypeOf(array1)});
+    try stdOut.print("{d}\n", .{array1});
+    try stdOut.print("{}\n", .{@TypeOf(array2)});
+    try stdOut.print("{d}\n", .{array2});
+
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
     std.debug.print("\nExec Done with --> {}ns\n", .{final_elapsed_time_ns});
 }
