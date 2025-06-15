@@ -66,9 +66,17 @@ pub fn main() !void {
     };
 
     const rocket_solar = Rocket{ .destination = "Atlantic", .code = 'U', .index = 9052 };
-    try StdOut.print("\nrocket_solar.destination = {s}\n", .{rocket_solar.destination});
-    try StdOut.print("rocket_solar.destination = {c}\n", .{rocket_solar.code});
-    try StdOut.print("rocket_solar.destination = {d}\n", .{rocket_solar.index});
+    try StdOut.print("\nrocket_solar: type = {}\n", .{@TypeOf(rocket_solar)});
+    try StdOut.print("rocket_solar.destination = {s}\n", .{rocket_solar.destination});
+    try StdOut.print("rocket_solar.code = {c}\n", .{rocket_solar.code});
+    try StdOut.print("rocket_solar.index = {d}\n", .{rocket_solar.index});
+
+    const ship_rock = .{ .ship_type = "FPSO", .destination = "New York", .code = 'P', .index = 2105 };
+    try StdOut.print("\nship_rock: type = {}\n", .{@TypeOf(ship_rock)});
+    try StdOut.print("ship_rock.type = {s}\n", .{ship_rock.ship_type});
+    try StdOut.print("ship_rock.destination = {s}\n", .{ship_rock.destination});
+    try StdOut.print("ship_rock.code = {c}\n", .{ship_rock.code});
+    try StdOut.print("ship_rock.index = {d}\n", .{ship_rock.index});
 
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
     std.debug.print("\nExec Done with --> {}ns\n", .{final_elapsed_time_ns});
