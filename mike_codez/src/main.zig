@@ -78,6 +78,10 @@ pub fn main() !void {
     try StdOut.print("ship_rock.code = {c}\n", .{ship_rock.code});
     try StdOut.print("ship_rock.index = {d}\n", .{ship_rock.index});
 
+    const student_tommy_tuple = .{ "Tommy", "Sophomor", 20 };
+    try StdOut.print("\nstudent_tommy_tuple: type = {}\n", .{@TypeOf(student_tommy_tuple)});
+    try StdOut.print("\nstudent_tommy_tuple: content = {}\n", .{student_tommy_tuple});
+
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
     std.debug.print("\nExec Done with --> {}ns\n", .{final_elapsed_time_ns});
 }
