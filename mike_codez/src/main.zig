@@ -59,15 +59,17 @@ pub fn main() !void {
     try StdOut.print("{}\n", .{@TypeOf(array2)});
     try StdOut.print("{d}\n", .{array2});
 
+    const Rocket = struct {
+        destination: []const u8,
+        code: u8,
+        index: u32,
+    };
+
     const rocket_solar = Rocket{ .destination = "Atlantic", .code = 'U', .index = 9052 };
-    try StdOut.print("\nrocket solar = {}\n", .{rocket_solar});
+    try StdOut.print("\nrocket_solar.destination = {s}\n", .{rocket_solar.destination});
+    try StdOut.print("rocket_solar.destination = {c}\n", .{rocket_solar.code});
+    try StdOut.print("rocket_solar.destination = {d}\n", .{rocket_solar.index});
 
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
     std.debug.print("\nExec Done with --> {}ns\n", .{final_elapsed_time_ns});
 }
-
-const Rocket = struct {
-    destination: []const u8,
-    code: u8,
-    index: u32,
-};
