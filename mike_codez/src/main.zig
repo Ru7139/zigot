@@ -90,6 +90,14 @@ pub fn main() !void {
     const color2 = Color.Blue;
     try out_writer.print("\nthere are two kind of color {} and {}\n", .{ color1, color2 });
 
+    const Num = union {
+        int: u32,
+        float: f32,
+    };
+    const num1 = Num{ .int = 10 };
+    const num2 = Num{ .float = 2.712 };
+    try out_writer.print("\nnum1 = {}, num2 = {}\n", .{ num1.int, num2.float });
+
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
     try out_writer.print("\nExec Done with --> {}ns\n", .{final_elapsed_time_ns});
 
