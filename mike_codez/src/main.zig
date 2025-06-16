@@ -85,6 +85,11 @@ pub fn main() !void {
     try out_writer.print("\nstudent_tommy_tuple: type = {}\n", .{@TypeOf(student_tommy_tuple)});
     try out_writer.print("\nstudent_tommy_tuple: content = {}\n", .{student_tommy_tuple});
 
+    const Color = enum { Red, Green, Blue };
+    const color1 = Color.Red;
+    const color2 = Color.Blue;
+    try out_writer.print("\nthere are two kind of color {} and {}\n", .{ color1, color2 });
+
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
     try out_writer.print("\nExec Done with --> {}ns\n", .{final_elapsed_time_ns});
 
