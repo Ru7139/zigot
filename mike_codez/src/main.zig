@@ -4,7 +4,6 @@ pub fn main() !void {
     const StdOut = std.io.getStdOut().writer();
     var out_buffer = std.io.bufferedWriter(StdOut);
     var out_writer = out_buffer.writer();
-    // const StdErr = std.io.getStdErr().writer();
 
     const start_time = std.time.nanoTimestamp();
 
