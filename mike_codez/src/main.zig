@@ -112,19 +112,26 @@ pub fn main() !void {
         .Tonga => try out_writer.print("\nWe are at {s}\n", .{@tagName(spot1)}),
     }
 
-    const MyUnion = union(enum) {
-        number: u32,
-        valid: bool,
-    };
-
+    const MyUnion = union(enum) { number: u32, valid: bool };
     const my_union_1 = MyUnion{ .number = 100 };
     switch (my_union_1) {
         .number => |number| try out_writer.print("\nGot {d}\n", .{number}),
         .valid => |v| try out_writer.print("\nThe vaild = {}\n", .{v}),
     }
 
+    const sign1 = 50;
+    const sign2: ?u32 = switch (sign1) {
+        10 => 20,
+        20 => 100,
+        else => null,
+    };
+    if (sign2) |value| {
+        try out_writer.print("\nThe value is {}\n", .{value});
+    } else {
+        try out_writer.print("\nCan not find value in sign2\n", .{});
+    }
+
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
     try out_writer.print("\nExec Done with --> {}ns\n", .{final_elapsed_time_ns});
-
     try out_buffer.flush();
 }
