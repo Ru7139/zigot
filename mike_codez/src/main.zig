@@ -66,7 +66,6 @@ pub fn main() !void {
         code: u8,
         index: u32,
     };
-
     const rocket_solar = Rocket{ .destination = "Atlantic", .code = 'U', .index = 9052 };
     try out_writer.print("\nrocket_solar: type = {}\n", .{@TypeOf(rocket_solar)});
     try out_writer.print("rocket_solar.destination = {s}\n", .{rocket_solar.destination});
@@ -87,7 +86,7 @@ pub fn main() !void {
     const Color = enum { Red, Green, Blue };
     const color1 = Color.Red;
     const color2 = Color.Blue;
-    try out_writer.print("\nthere are two kind of color {} and {}\n", .{ color1, color2 });
+    try out_writer.print("\nthere are two kind of color {s} and {s}\n", .{ @tagName(color1), @tagName(color2) });
 
     const Num = union {
         int: u32,
@@ -111,6 +110,17 @@ pub fn main() !void {
         .Paris => try out_writer.print("\nWe have been {s}\n", .{@tagName(spot1)}),
         .Mosco => try out_writer.print("\nWe fly to {s}\n", .{@tagName(spot1)}),
         .Tonga => try out_writer.print("\nWe are at {s}\n", .{@tagName(spot1)}),
+    }
+
+    const MyUnion = union(enum) {
+        number: u32,
+        valid: bool,
+    };
+
+    const my_union_1 = MyUnion{ .number = 100 };
+    switch (my_union_1) {
+        .number => |number| try out_writer.print("\nGot {d}\n", .{number}),
+        .valid => |v| try out_writer.print("\nThe vaild = {}\n", .{v}),
     }
 
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
