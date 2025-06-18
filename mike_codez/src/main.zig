@@ -104,6 +104,15 @@ pub fn main() !void {
         else => try out_writer.print("\nthis is not the correct value\n", .{}),
     }
 
+    const Spot = enum { NewYork, Paris, Mosco, Tonga };
+    const spot1 = Spot.Tonga;
+    switch (spot1) {
+        .NewYork => try out_writer.print("\nWe create {s}\n", .{@tagName(spot1)}),
+        .Paris => try out_writer.print("\nWe have been {s}\n", .{@tagName(spot1)}),
+        .Mosco => try out_writer.print("\nWe fly to {s}\n", .{@tagName(spot1)}),
+        .Tonga => try out_writer.print("\nWe are at {s}\n", .{@tagName(spot1)}),
+    }
+
     const final_elapsed_time_ns: i128 = std.time.nanoTimestamp() - start_time; // i128除法需要配置
     try out_writer.print("\nExec Done with --> {}ns\n", .{final_elapsed_time_ns});
 
