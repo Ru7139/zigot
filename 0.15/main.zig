@@ -1,6 +1,6 @@
 const std = @import("std");
-const print = std.debug.print;
 
-pub fn main() void {
-    print("Hello World {}\n", .{25});
+pub fn main() !void {
+    try std.fs.File.stdout().writeAll("Hello");
+    std.debug.print(" {s}\n", .{"World!"});
 }
