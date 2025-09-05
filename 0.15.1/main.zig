@@ -50,6 +50,5 @@ pub fn main() !void {
         .float_32_ = std.math.pi,
         .compile_time_float = std.math.pi,
     };
-
-    print("{any}\n", .{some_primitives_struct});
+    print("{any}\n\n", .{some_primitives_struct});
 }
