@@ -69,7 +69,7 @@ test "1.1 ---> variable declare" {
 
 }
 
-test "1.2 @(1/3) ---> basic types" {
+test "1.2 @(1/3) ---> basic types (numbers value)" {
     const one_billion = 1_000_000_000;
     const binary_mask = 0b1_1111_1111;
     const permisssions = 0o7_5_5;
@@ -163,3 +163,5 @@ test "1.2 @(1/3) ---> basic types" {
     const z_4 = Complex.init(1, 2).mul(Complex.init(1, -2));
     println_fn("z_4", z_4);
 }
+
+test "1.2 @(2/3) ---> basic types (string value)" {}
