@@ -186,3 +186,5 @@ test "1.2 @(2/3) ---> basic types (string value)" {
     // c_char
     // bool value: true false only takes 1 bytes
 }
+
+test "1.2 @(3/3) ---> basic types (function)" {}
