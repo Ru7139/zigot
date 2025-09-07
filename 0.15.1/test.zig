@@ -68,3 +68,22 @@ test "1.1 ---> variable declare" {
     //
 
 }
+
+test "1.2 ---> basic types" {
+    const one_billion = 1_000_000_000;
+    const binary_mask = 0b1_1111_1111;
+    const permisssions = 0o7_5_5;
+    const big_address = 0xFF80_FFFF_FFFF_FFFF;
+    const tuple_1 = .{ one_billion, binary_mask, permisssions, big_address };
+    println_fn("tuple_1", tuple_1);
+
+    const int_7: i7 = std.math.maxInt(i7);
+    const uint_7: u7 = std.math.maxInt(u7);
+    const sum_i7_u7: u32 = @as(u32, @intCast(int_7)) + @as(u32, uint_7);
+    println_fn("maxInt.i7 + maxInt.u7", sum_i7_u7);
+
+    // 10x ---> 123456789
+    // 16x ---> 0xffff
+    // 8x ---> 0o755
+    // 2x(binnary) ---> 0b_1111_0000
+}
