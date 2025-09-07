@@ -69,7 +69,7 @@ test "1.1 ---> variable declare" {
 
 }
 
-test "1.2 ---> basic types" {
+test "1.2 @(1/3) ---> basic types" {
     const one_billion = 1_000_000_000;
     const binary_mask = 0b1_1111_1111;
     const permisssions = 0o7_5_5;
@@ -96,10 +96,70 @@ test "1.2 ---> basic types" {
     println_fn("z", z);
 
     const u32_max: u32 = std.math.maxInt(u32);
+    assert(u32_max == 4294967295);
     const add_overflow = @addWithOverflow(u32_max, 128); // show what the bit are
     println_fn("add_overflow", add_overflow);
 
-    const i32_min: i32 = std.math.minInt(i32); // -2147483648
+    const i32_min: i32 = std.math.minInt(i32);
+    assert(i32_min == -2147483648);
     const min_overflow = @subWithOverflow(i32_min, 1); // 2147483647
     println_fn("min_overflow", min_overflow);
+
+    const mul_val_0: u32 = @divTrunc(std.math.maxInt(u32), 3) + 1;
+    const mul_overflow = @mulWithOverflow(mul_val_0, 3);
+    assert(mul_overflow[0] == 2);
+    println_fn("mul_overflow", mul_overflow);
+
+    const u64_0: u64 = 1; // 0001
+    const shift_amt_0: u4 = 2;
+    const shl_overflow = @shlWithOverflow(u64_0, shift_amt_0);
+    assert(shl_overflow[0] == 0b100);
+    println_fn("shift_amt_0", shl_overflow);
+
+    var zero_val: u32 = std.math.maxInt(u32);
+    zero_val +%= 3;
+    assert(zero_val == 2);
+    zero_val -%= 3;
+    assert(zero_val == std.math.maxInt(u32));
+    zero_val *%= 10;
+    zero_val -%= (std.math.maxInt(u32) - 10);
+    assert(zero_val == 1);
+    println_fn("zero_val", zero_val);
+
+    const inf_0: f64 = std.math.inf(f64);
+    println_fn("inf_0", inf_0);
+    const negative_inf_0: f32 = -std.math.inf(f32);
+    println_fn("negative_inf_0", negative_inf_0);
+    const nan_0: f128 = std.math.nan(f128);
+    println_fn("nan_0", nan_0);
+
+    assert(0.1 + 0.2 != 0.3);
+
+    // common algorithm
+    // == !=
+    // > >=
+    // < <=
+    // + - * /
+    // << >>
+    // and or !
+    // a&b, a|b, a^b, a~b
+    // 饱和运算，不会超过最大值
+    // +|, -|, *|, <<|
+    // 数组串联 ++
+    // 数组重复 **
+
+    const Complex = std.math.Complex(f64);
+    const complex_i = Complex.init(0, 1); // Z = 0 + 1i;
+
+    const z_1 = complex_i.mul(complex_i); // Z^2 = -1 + 0i
+    println_fn("z_1", z_1);
+
+    const z_2 = std.math.complex.pow(complex_i, Complex.init(2, 0));
+    println_fn("z_2", z_2);
+
+    const z_3 = std.math.complex.exp(complex_i.mul(Complex.init(std.math.pi, 0)));
+    println_fn("z_3", z_3);
+
+    const z_4 = Complex.init(1, 2).mul(Complex.init(1, -2));
+    println_fn("z_4", z_4);
 }
