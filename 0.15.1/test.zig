@@ -86,4 +86,20 @@ test "1.2 ---> basic types" {
     // 16x ---> 0xffff
     // 8x ---> 0o755
     // 2x(binnary) ---> 0b_1111_0000
+
+    const value_0: u32 = (3 + 2 - 1) * 3; // 12
+    const x: f64 = @divTrunc(@as(i32, value_0) * (-1), 5);
+    println_fn("x", x); // -12/5 ---> -2.4 ---> -2
+    const y: f64 = @divFloor(@as(i32, value_0) * (-1), 5);
+    println_fn("y", y); // -12/5 ---> -2.4 ---> -3
+    const z: f64 = @divExact(value_0, 4);
+    println_fn("z", z);
+
+    const u32_max: u32 = std.math.maxInt(u32);
+    const add_overflow = @addWithOverflow(u32_max, 128); // show what the bit are
+    println_fn("add_overflow", add_overflow);
+
+    const i32_min: i32 = std.math.minInt(i32); // -2147483648
+    const min_overflow = @subWithOverflow(i32_min, 1); // 2147483647
+    println_fn("min_overflow", min_overflow);
 }
