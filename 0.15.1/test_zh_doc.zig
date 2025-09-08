@@ -303,3 +303,41 @@ test "1.3 (1/8) advance type: array" {
     };
     print("fancy_array ---> {any}\n", .{fancy_array});
 }
+
+test "1.3 (2/8) advance type: vector" {
+    const vec_1 = @Vector(4, u32){ 1, 2, 3, 4 };
+    const arr_1: [4:127]u32 = vec_1;
+    print("arr_1 ---> {any}\n", .{arr_1});
+
+    const arr_2 = arr_1 ** 2;
+    const vec_2: @Vector(8, u32) = arr_2;
+    print("vec_2 ---> {any}\n", .{vec_2});
+
+    const vec_3 = arr_2[2..6].*;
+    print("vec_3 ---> {any}\n", .{vec_3});
+
+    const vec_4: @Vector(8, u32) = @splat(10);
+    print("vec_4 ---> {any}\n", .{vec_4});
+
+    const V432 = @Vector(4, i32); // 定义了一个 type
+    const vec_x1 = V432{ 1, 1, -1, -1 };
+    const vec_x2: @Vector(4, i32) = vec_x1 +| @as(V432, @splat(5));
+    // 6, 6, 4, 4 ---> 36 * 16 ---> 576
+    const rxt = @reduce(.Mul, vec_x2);
+    // reduce支持
+    // .And .Or .Xor
+    // .Max .Min .Add .Mul
+    println_fn("rxt ---> {}\n", .{rxt});
+
+    const vec_y1 = @Vector(9, u8){ 'h', 'O', 'W', 'A', 'r', 'e', 'y', 'o', 'u' };
+    const vec_y2 = @Vector(4, u8){ 'n', 'I', 'c', 'e' };
+    const mask_0 = @Vector(4, i32){ -2, 1, 2, 3 };
+    const str_0: @Vector(4, u8) = @shuffle(u8, vec_y1, vec_y2, mask_0);
+    print("str_0 ---> {any}\n", .{str_0}); // IOWA
+
+    const vec_z1 = @Vector(4, u8){ 'N', 'O', 'o', 'A' };
+    const vec_z2 = @Vector(4, u8){ 'k', 'e', 'V', 'c' };
+    const pred_0 = @Vector(4, bool){ true, true, false, true };
+    const str_1 = @select(u8, pred_0, vec_z1, vec_z2);
+    print("str_1 ---> {any}\n", .{str_1}); // NOVA
+}
