@@ -254,3 +254,52 @@ test "1.2 @(3/3) ---> basic types (function)" {
     // 请参考 std.builtin.CallingConvention (https://ziglang.org/documentation/master/std/#std.builtin.CallingConvention)
     //
 }
+
+test "1.3 (1/8) advance type: array" {
+    print("\n----- ----- >>> advance type <<< ----- -----\n", .{});
+    const message_0: [5]u8 = [5]u8{ 'T', 'o', 'd', 'a', 'y' };
+    assert(message_0[0] == 'T');
+    print("mes_0 ---> {s}\n", .{message_0});
+    const p1, const p2, const p3, const p4, const p5 = message_0;
+    print("{c} {c} {c} {c} {c}\n", .{ p1, p2, p3, p4, p5 });
+    // const message_1: []const u8 = "Today is a beautiful day\n";
+    // _ = message_1;
+
+    const matrix_33 = [3][3]u32{
+        [3]u32{ 1, 2, 3 },
+        [3]u32{ 4, 5, 6 },
+        [3]u32{ 7, 8, 9 },
+    };
+    for (matrix_33, 0..) |arr, loc_x| {
+        for (arr, 0..) |value, loc_y| {
+            print("arr[{}][{}] ---> {}\t", .{ loc_x, loc_y, value });
+        }
+        print("\n", .{});
+    }
+
+    // 哨兵数组（标记终止值的数组）
+    const array_with_sign: [5:7]u8 = [_:7]u8{ 1, 2, 4, 8, 16 };
+    println_fn("arr_len", array_with_sign.len);
+
+    // 数组重复赋值
+    const array_5_times_copy: [30:7]u8 = array_with_sign ** 6; // must be [30:7] or
+    // note: array sentinel '7' cannot cast into array sentinel '17'
+
+    print("arr_5_copy ---> {any}\n", .{array_5_times_copy});
+    println_fn("[arr_with_sign's last] ---> ", array_with_sign[5]);
+    println_fn("[arr_5_copy's last] ---> ", array_5_times_copy[30]);
+
+    const array_part_1: [5]isize = [_]isize{ 2, 4, 6, 8, 10 };
+    const array_part_2: [5]isize = [_]isize{ 3, 5, 7, 9, 11 };
+    const array_whole: [10]isize = array_part_1 ++ array_part_2;
+    print("array_whole ---> {any}\n", .{array_whole});
+
+    const fancy_array = init: {
+        var initial_value: [10]usize = undefined;
+        for (&initial_value, 0..) |*ptr, index| {
+            ptr.* = 2 * index + 1;
+        }
+        break :init initial_value;
+    };
+    print("fancy_array ---> {any}\n", .{fancy_array});
+}
