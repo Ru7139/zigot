@@ -162,6 +162,8 @@ test "1.2 @(1/3) ---> basic types (numbers value)" {
 
     const z_4 = Complex.init(1, 2).mul(Complex.init(1, -2));
     println_fn("z_4", z_4);
+
+    return error.SkipZigTest;
 }
 
 test "1.2 @(2/3) ---> basic types (string value)" {
@@ -185,6 +187,27 @@ test "1.2 @(2/3) ---> basic types (string value)" {
 
     // c_char
     // bool value: true false only takes 1 bytes
+
 }
 
-test "1.2 @(3/3) ---> basic types (function)" {}
+test "1.2 @(3/3) ---> basic types (function)" {
+    const add_fn = struct {
+        inline fn com_add_or_min_2b(comptime T: type, a: T, b: T) T {
+            const bm2 = 2 *| b;
+            return if (a > b) @subWithOverflow(a, bm2)[0] else (a +| bm2);
+        }
+    };
+    const val = add_fn.com_add_or_min_2b(u16, 150, 10);
+    println_fn("val", val);
+
+    const closure_func = struct {
+        inline fn football(comptime x: i32) fn (i32) i32 {
+            return struct {
+                fn ball_counts(y: i32) i32 {
+                    var counts = 0;
+                    for (x..y) |i| {}
+                }
+            };
+        }
+    };
+}
