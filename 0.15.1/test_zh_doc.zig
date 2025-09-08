@@ -9,14 +9,16 @@ fn println_fn(name: []const u8, x: anytype) void {
 test "test_or_skip_example" {
     print("\t---> test <---\n", .{});
 
-    const ts: i64 = std.time.timestamp();
-    if (@mod(ts, 2) == 0) {
-        print("{} can be divided by 2\n", .{ts});
-        try std.testing.expect(true);
-    } else {
-        print("time stamp is {}\n", .{ts});
-        return error.SkipZigTest;
-    }
+    // const ts: i64 = std.time.timestamp();
+    // if (@mod(ts, 2) == 0) {
+    //     print("{} can be divided by 2\n", .{ts});
+    //     try std.testing.expect(true);
+    // } else {
+    //     print("time stamp is {}\n", .{ts});
+    //     return error.SkipZigTest;
+    // }
+
+    try std.testing.expect(true);
 }
 
 test "0.0 ---> hello_world_test" {
@@ -162,8 +164,6 @@ test "1.2 @(1/3) ---> basic types (numbers value)" {
 
     const z_4 = Complex.init(1, 2).mul(Complex.init(1, -2));
     println_fn("z_4", z_4);
-
-    return error.SkipZigTest;
 }
 
 test "1.2 @(2/3) ---> basic types (string value)" {
@@ -201,13 +201,56 @@ test "1.2 @(3/3) ---> basic types (function)" {
     println_fn("val", val);
 
     const closure_func = struct {
-        inline fn football(comptime x: i32) fn (i32) i32 {
+        inline fn football(comptime x: usize) fn (usize) usize {
             return struct {
-                fn ball_counts(y: i32) i32 {
-                    var counts = 0;
-                    for (x..y) |i| {}
+                fn ball_counts(y: usize) usize {
+                    var counts: usize = 0;
+                    for (x..y) |i| {
+                        counts +|= @as(usize, @intCast(i));
+                    }
+                    print("counts = {}\n", .{counts});
+                    return counts;
                 }
-            };
+            }.ball_counts;
+            // return add_closure.ball_counts;
         }
+
+        inline fn baseball(x: anytype) @TypeOf(x) {
+            return x + 11;
+        }
+
+        // export 关键字确保函数在生成的目标文件 (object file) 中可见，并遵循 C ABI
+        export fn sub_i8_mul_2_fn(a: i8, b: i8) i8 {
+            return (a -| b) *| 2;
+        }
+
+        //  extern 说明符用于声明一个将在链接时解析的函数
+        // （即该函数并非由 Zig 定义，而是由外部库定义，通常遵循 C ABI，但 C ABI 本身有多种规范）
+        //  链接可以是静态链接或动态链接。extern 关键字后面引号中的标识符指定了包含该函数的库
+        // （例如 c -> libc.so）。callconv 说明符用于更改函数的调用约定
+        extern "c" fn atan2(a: f64, b: f64) f64;
     };
+
+    const clo_0 = closure_func.football(15); // [hoc] 15 is the cature value
+    const val_2 = clo_0(25);
+    _ = val_2;
+
+    const val_3 = closure_func.baseball(49);
+    println_fn("val_3", val_3);
+
+    // noreturn is also a type
+    // break continue return unreachable while(true) {}
+
+    const val_4 = closure_func.sub_i8_mul_2_fn(5, 10);
+    println_fn("val_4", val_4);
+
+    const val_5 = closure_func.atan2(0.33, 0.55);
+    println_fn("val_5", val_5);
+
+    // @branchHint(.cold);
+    // 告诉优化器当前函数很少被调用（或不被调用）。该函数仅在_函数作用域_内有效。
+    //
+    // callconv 关键字用于指定函数的调用约定，这在对外暴露函数或编写裸汇编时非常有用。
+    // 请参考 std.builtin.CallingConvention (https://ziglang.org/documentation/master/std/#std.builtin.CallingConvention)
+    //
 }
