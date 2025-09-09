@@ -341,3 +341,21 @@ test "1.3 (2/8) advance type: vector" {
     const str_1 = @select(u8, pred_0, vec_z1, vec_z2);
     print("str_1 ---> {any}\n", .{str_1}); // NOVA
 }
+
+test "1.3 (3/8) advance type: pointer" {
+    var val_i8_0: i8 = 0b0111_1111;
+    const ptr_0: *i8 = &val_i8_0;
+    println_fn("ptr_0.*", ptr_0.*);
+    ptr_0.* = -128;
+    println_fn("val_i8_0", val_i8_0);
+
+    var vec_0: @Vector(16, u32) = @splat(16);
+    const ptr_1: *@Vector(16, u32) = &vec_0;
+    ptr_1.*[0] = 32;
+    print("vec_0[0] ---> {d}\n", .{vec_0[0]});
+
+    var array_0 = [5]u16{ 1, 2, 3, 4, 5 };
+    const ptr_2: [*]u16 = &array_0;
+    ptr_2[0] = std.math.maxInt(u16);
+    print("array[0] ---> {d}\n", .{array_0[0]});
+}
