@@ -359,5 +359,14 @@ test "1.3 (3/8) advance type: pointer" {
     ptr_2[0] = std.math.maxInt(u16);
     print("array[0] ---> {d}\n", .{array_0[0]});
 
-    std.Thread.sleep(1_000_000_000);
+    const ptr_3: *i32 = @ptrFromInt(0xdeadbee0);
+    const addr = @intFromPtr(ptr_3);
+    if (@TypeOf(addr) == usize) {
+        print("Successed\n", .{});
+    }
+    if (addr == 0xdeadbee0) {
+        println_fn("ptr 0xdeadbee0", addr);
+    }
+    
+    
 }
