@@ -361,12 +361,7 @@ test "1.3 (3/8) advance type: pointer" {
 
     const ptr_3: *i32 = @ptrFromInt(0xdeadbee0);
     const addr = @intFromPtr(ptr_3);
-    if (@TypeOf(addr) == usize) {
-        print("Successed\n", .{});
+    if (@TypeOf(addr) == usize and addr == 0xdeadbee0) {
+        println_fn("Successed ptr 0xdeadbee0", addr);
     }
-    if (addr == 0xdeadbee0) {
-        println_fn("ptr 0xdeadbee0", addr);
-    }
-    
-    
 }
