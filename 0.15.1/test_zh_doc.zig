@@ -362,6 +362,16 @@ test "1.3 (3/8) advance type: pointer" {
     const ptr_3: *i32 = @ptrFromInt(0xdeadbee0);
     const addr = @intFromPtr(ptr_3);
     if (@TypeOf(addr) == usize and addr == 0xdeadbee0) {
+        print("addr ---> HEX: {x}\n", .{addr});
         println_fn("Successed ptr 0xdeadbee0", addr);
+    }
+
+    const bytes_0 align(@alignOf(u32)) = [_]u8{ 0x13, 0x12, 0x12, 0x12 };
+    const u32_ptr_0: *const u32 = @ptrCast(&bytes_0);
+    if (u32_ptr_0.* == 0x12121213) {
+        println_fn("u32_ptr_0", u32_ptr_0);
+        println_fn("u32_ptr_0.*", u32_ptr_0.*);
+        // 1212_1212 ---> 303174162
+        // 1212_1213 ---> 303174163
     }
 }
