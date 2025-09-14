@@ -374,4 +374,8 @@ test "1.3 (3/8) advance type: pointer" {
         // 1212_1212 ---> 303174162
         // 1212_1213 ---> 303174163
     }
+
+    if (@as(u32, @bitCast(bytes_0)) == 0x12121213) {
+        println_fn("success", .{});
+    }
 }
