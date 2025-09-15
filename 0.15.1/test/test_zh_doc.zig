@@ -378,4 +378,22 @@ test "1.3 (3/8) advance type: pointer" {
     if (@as(u32, @bitCast(bytes_0)) == 0x12121213) {
         println_fn("success", .{});
     }
+
+    // volatile
+    const expect = std.testing.expect;
+
+    const mmio_ptr: *volatile u8 = @ptrFromInt(0x12345678);
+    try expect(@TypeOf(mmio_ptr) == *volatile u8);
+
+    // 对齐
+    const builtin = @import("builtin");
+    var x_0: i32 = 1234;
+    const align_of_i32 = @alignOf(@TypeOf(x_0)); // 获取内存信息
+
+    try expect(@TypeOf(&x_0) == *i32); // 尝试比较类型
+    try expect(*i32 == *align(align_of_i32) i32); // 内存对齐后再进行类型比较
+
+    if (builtin.target.cpu.arch == .aarch64) { // 获得对齐大小
+        try expect(@typeInfo(*i32).pointer.alignment == 4);
+    }
 }
