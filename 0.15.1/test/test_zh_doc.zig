@@ -396,4 +396,23 @@ test "1.3 (3/8) advance type: pointer" {
     if (builtin.target.cpu.arch == .aarch64) { // 获得对齐大小
         try expect(@typeInfo(*i32).pointer.alignment == 4);
     }
+
+    const zero: usize = 0;
+    const ptr: *allowzero i32 = @ptrFromInt(zero);
+    try expect(@intFromPtr(ptr) == 0);
+
+    comptime {
+        // 只要不依赖编译结果的内存布局
+        var x_1: i32 = 1;
+        const ptr_4 = &x_1;
+        ptr_4.* += 1;
+        x_1 += 1;
+        try expect(ptr_4.* == 3);
+
+        // 只要指针未被解引用，zig就能在comptime中保留其内存地址
+        const ptr_5: *i32 = @ptrFromInt(0xdeadbee4);
+        const addr_5 = @intFromPtr(ptr_5);
+        try expect(@TypeOf(addr_5) == usize);
+        try expect(addr_5 == 0xdeadbee4);
+    }
 }
