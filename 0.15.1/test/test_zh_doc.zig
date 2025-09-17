@@ -416,3 +416,5 @@ test "1.3 (3/8) advance type: pointer" {
         try expect(addr_5 == 0xdeadbee4);
     }
 }
+
+test "1.3 (4/8) advance type: slice" {}
