@@ -599,3 +599,19 @@ test "1.3 (8/8) advance type: opaque" {
 
     _ = func_struct;
 }
+
+test "1.4 union" {}
+
+test "1.5 zero-sized types" {}
+
+test "1.6 flow control (1/5) if" {}
+
+test "1.6 flow control (2/5) loop" {}
+
+test "1.6 flow control (3/5) switch" {}
+
+test "1.6 flow control (4/5) defer" {}
+
+test "1.6 flow control (5/5) unreachable" {}
+
+test "1.7 selectable type" {}
