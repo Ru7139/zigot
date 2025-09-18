@@ -558,4 +558,44 @@ test "1.3 (6/8) advance type: struct" {
     _ = t_1_0;
 }
 
-test "1.3 (7/8) advance type: enum" {}
+test "1.3 (7/8) advance type: enum" {
+    const option_flag = enum {
+        CALL,
+        PUT,
+    };
+
+    const order_type = enum {
+        LONG_BUY,
+        SHORT_SELL,
+    };
+
+    const OptionOrder = struct { trend: option_flag, buy_or_sell: order_type, price: f64 };
+
+    const OptionOrder_OOP = struct {
+        fn new(trend: option_flag, buy_or_sell: order_type, price: f64) OptionOrder {
+            return OptionOrder{
+                .trend = trend,
+                .buy_or_sell = buy_or_sell,
+                .price = price,
+            };
+        }
+    };
+
+    const option_0 = OptionOrder_OOP.new(option_flag.CALL, order_type.LONG_BUY, 20.0);
+    _ = option_0;
+}
+
+test "1.3 (8/8) advance type: opaque" {
+    const Derp = opaque {};
+    const Wat = opaque {};
+
+    const func_struct = struct {
+        extern fn bar(d: *Derp) void;
+
+        fn foo(w: *Wat) callconv(.c) void {
+            bar(w);
+        }
+    };
+
+    _ = func_struct;
+}
