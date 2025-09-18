@@ -450,7 +450,7 @@ test "1.3 (6/8) advance type: struct" {
         radius: f64,
     };
 
-    const OOP_FUNC = struct {
+    const OOP_1_FUNC = struct {
         fn new(radius: f64) Circle_OOP {
             return Circle_OOP{ .radius = radius };
         }
@@ -464,7 +464,98 @@ test "1.3 (6/8) advance type: struct" {
         }
     };
 
-    var circle_1 = OOP_FUNC.new(3.0);
-    OOP_FUNC.double_the_area(&circle_1);
-    println_fn("circle_0.area()", OOP_FUNC.area(&circle_1), NORMAL_PRINTLN);
+    var circle_1 = OOP_1_FUNC.new(3.0);
+    OOP_1_FUNC.double_the_area(&circle_1);
+    println_fn("circle_0.area()", OOP_1_FUNC.area(&circle_1), NORMAL_PRINTLN);
+
+    // // // // // // // // // // // // // // // // // // // //
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+
+    const User = struct {
+        username: []u8,
+        password: []u8,
+        email: []u8,
+        active: bool,
+    };
+
+    const OOP_2_FUNC = struct {
+        pub const writer = "zig_course";
+
+        fn new(username: []u8, password: []u8, email: []u8, active: bool) User {
+            return User{ .username = username, .password = password, .email = email, .active = active };
+        }
+
+        fn self_print(self: *User) void {
+            print(
+                \\username: {s}
+                \\password: {s}
+                \\email: {s}
+                \\active: {}
+                \\
+            , .{ self.username, self.password, self.email, self.active });
+        }
+    };
+
+    const name_0 = "xiao ming";
+    const pass_0 = "xiao ming de mi ma";
+    const email_0 = "xiaoming@139.com";
+
+    const allocator_0 = gpa.allocator();
+    defer {
+        const xiaoming_status = gpa.deinit();
+        if (xiaoming_status == .leak) {
+            std.testing.expect(false) catch @panic("XIAOMING TEST FAIL");
+        }
+    }
+
+    const username_a = try allocator_0.alloc(u8, 20);
+    const pass_a = try allocator_0.alloc(u8, 20);
+    const email_a = try allocator_0.alloc(u8, 20);
+
+    defer allocator_0.free(username_a);
+    defer allocator_0.free(pass_a);
+    defer allocator_0.free(email_a);
+
+    // memset 让一段内存为0
+    @memset(username_a, 0);
+    @memset(pass_a, 0);
+    @memset(email_a, 0);
+
+    // memcpy 拷贝内存
+    @memcpy(username_a[0..name_0.len], name_0);
+    @memcpy(pass_a[0..pass_0.len], pass_0);
+    @memcpy(email_a[0..email_0.len], email_0);
+
+    var user_xiaoming = OOP_2_FUNC.new(username_a, pass_a, email_a, true);
+    OOP_2_FUNC.self_print(&user_xiaoming);
+
+    const OOP_3_FUNC = struct {
+        fn LinkedList(comptime T: type) type {
+            return struct {
+                pub const Node = struct { prev: ?*Node, next: ?*Node, data: T };
+                first: ?*Node,
+                last: ?*Node,
+                len: usize,
+            };
+        }
+    };
+
+    const link_0 = OOP_3_FUNC.LinkedList(u32);
+    println_fn("link_0", link_0, ANY_PRINTLN);
+
+    const struct_c_ponint: *Circle_OOP = @fieldParentPtr("radius", &circle_1.radius);
+    struct_c_ponint.radius = 10;
+    const area_2 = OOP_1_FUNC.area(&circle_1);
+    println_fn("temp area", area_2, NORMAL_PRINTLN);
+
+    const tuple_0 = .{
+        @as(u32, 15),
+        @as(f32, 2.3),
+        true,
+        "hi",
+    };
+    const t_1_0 = tuple_0.@"1";
+    _ = t_1_0;
 }
+
+test "1.3 (7/8) advance type: enum" {}
