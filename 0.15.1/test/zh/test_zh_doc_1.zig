@@ -600,7 +600,27 @@ test "1.3 (8/8) advance type: opaque" {
     _ = func_struct;
 }
 
-test "1.4 union" {}
+test "1.4 union" {
+    const Payload = union { one: u32, two: f32, avalid: bool };
+
+    var payment = Payload{ .avalid = true };
+    payment = Payload{ .one = 32 };
+
+    println_fn("payment", payment, ANY_PRINTLN);
+
+    const paypay_ment = @unionInit(Payload, "one", 567);
+    println_fn("paypay_ment", paypay_ment, ANY_PRINTLN);
+
+    const ComplexTypeTag = enum {
+        ok,
+        not_ok,
+    };
+
+    const ComplexTypeTag = union(ComplexTypeTag) {
+        ok: u8,
+        not_ok: void,
+    };
+}
 
 test "1.5 zero-sized types" {}
 
