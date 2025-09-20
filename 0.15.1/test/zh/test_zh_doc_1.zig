@@ -827,8 +827,25 @@ test "1.6 flow control (3/5) switch" {
     // println_fn("sum", sum, NORMAL_PRINTLN);
 }
 
-test "1.6 flow control (4/5) defer" {}
+test "1.6 flow control (4/5) defer" {
+    // 将在作用域末尾执行的表达式
+    // 如果存在多个 defer 则按照先进后出的方式从内存中清除
 
-test "1.6 flow control (5/5) unreachable" {}
+    // 2 + 4 = 6\n
+    defer print(" = 6\n", .{});
+    defer print(" + 4", .{});
+    defer print("2", .{});
+
+    // 如果控制流不经过defer则不执行
+    // 另见errdefer
+}
+
+test "1.6 flow control (5/5) unreachable" {
+    // 在Debug ReleaseSafe模式下，unreachable会触发panic
+    // 在ReleaseFast ReleaseSmall模式下，编译器会假定永远不会执行道unreachalbe
+    // 从而进行对代码的优化
+}
 
 test "1.7 selectable type" {}
+
+test "1.8 error handling" {}
