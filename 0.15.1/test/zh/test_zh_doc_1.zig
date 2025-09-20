@@ -779,7 +779,53 @@ test "1.6 flow control (2/5) loop" {
     // 同样可以解构可选类型
 }
 
-test "1.6 flow control (3/5) switch" {}
+test "1.6 flow control (3/5) switch" {
+    const num_0: u32 = 10;
+    const str_0 = switch (num_0) {
+        0...10 => "it is in [0..10]",
+        11 => switch_block_0: {
+            // 支持编译器运算
+            break :switch_block_0 (std.math.pow(u32, num_0, 3) + 1);
+        },
+        else => "it is beyond 11 or below 0",
+    };
+    assert(std.mem.eql(u8, str_0, "it is in [0..10]"));
+
+    // 可以匹配enum和union(enum)
+    // 可以使用inline
+
+    // blow can be complied as zig version is 0.14.0
+    // const Instruction = enum {
+    //     plus,
+    //     minus,
+    //     multiply,
+    //     divide,
+    // };
+    //
+    // const FUNC = struct {
+    //     fn evaluate(initial_stack: []const i32, code: []const Instruction) !i32 {
+    //         var stack = try std.BoundedArray(i32, 8).fromSlice(initial_stack);
+    //         var ip: usize = 0;
+
+    //         return vm: switch (code[ip]) {
+    //             Instruction.plus => {
+    //                 try stack.append(stack.pop().? + stack.pop().?);
+    //                 ip += 1;
+    //                 continue :vm code[ip];
+    //             },
+    //             else => {
+    //                 ip += 1;
+    //                 continue :vm code[ip];
+    //             },
+    //         };
+    //     }
+    // };
+
+    // const array_0: [8]i32 = .{ -2, -3, 10, 20, 1, -1, 5, 3 };
+    // const inst_arr_0: [8]Instruction = .{ .plus, .plus, .plus, .plus, .divide, .minus, .multiply, .plus };
+    // const sum = FUNC.evaluate(&array_0, &inst_arr_0);
+    // println_fn("sum", sum, NORMAL_PRINTLN);
+}
 
 test "1.6 flow control (4/5) defer" {}
 
