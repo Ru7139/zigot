@@ -616,15 +616,102 @@ test "1.4 union" {
         not_ok,
     };
 
-    const ComplexTypeTag = union(ComplexTypeTag) {
+    const ComplexType = union(ComplexTypeTag) {
         ok: u8,
         not_ok: void,
     };
+
+    var c = ComplexType{ .ok = 123 };
+    switch (c) {
+        ComplexTypeTag.ok => |*value| value.* += 1,
+        ComplexTypeTag.not_ok => unreachable,
+    }
+
+    try std.testing.expect(c.ok == 124);
+
+    // 正如函数命名，返回union和enum中的字段名称
+    const tag_name = @tagName(ComplexType.ok);
+    println_fn("tag_name", tag_name, ANY_PRINTLN);
+
+    // extern union 内存布局与目标C ABI兼容
+    // packed union 内存布局与声明顺序相同，并且尽可能紧凑
 }
 
-test "1.5 zero-sized types" {}
+test "1.5 zero-sized types" {
+    // void
+    const map_0 = std.AutoHashMap(i32, void).init(std.testing.allocator);
+    _ = map_0;
 
-test "1.6 flow control (1/5) if" {}
+    // u0, i0       // 可以使用 u0和i0 声明零大小整数类型，他们的大小都是0bit
+    // array, slice // 数组和切片长度为0时，被视为零大小类型
+    // enum         // 只有一个成员的枚举也是零大小类型
+    // struct       // 结构体为空时，或所有字段都是零大小类型时，为零大小类型
+    // union        // 当联合类型仅包含一种可能类型时，......
+}
+
+test "1.6 flow control (1/5) if" {
+    const a: u32 = 1;
+    if (a == 1) {
+        assert(@TypeOf(a) == u32);
+    } else {
+        assert(@TypeOf(a) != u32);
+    }
+
+    // enum匹配
+    const Rocket_color = enum {
+        red,
+        blue,
+        green,
+    };
+
+    const moon_rocket = Rocket_color.red;
+    if (moon_rocket == Rocket_color.red) {
+        assert(@sizeOf(Rocket_color) == 1);
+        assert(@TypeOf(Rocket_color) == type); // comptime_int?
+    }
+
+    // 三元运算符
+    const b = 2;
+    const c = 3;
+    const d = if (b != c) 7 else 507;
+    assert(d == 7);
+
+    // 解构可选类型
+    var num_0: ?u32 = null;
+    if (num_0) |*val| {
+        val.* += 5;
+        print("the val of num_0 = {}\n", .{num_0.?});
+    } else {
+        print("the val of num_0 is null and it is 0 now\n", .{});
+    }
+
+    var num_1: ?u32 = 2;
+    if (num_1) |*value| {
+        value.* *= 3;
+    }
+    assert(num_1.? == 6);
+
+    const num_2: anyerror!u32 = 0;
+    if (num_2) |value| {
+        assert(value == 0);
+    } else |err| {
+        print("err-err-err: {}\n", .{err});
+        // try std.testing.expect(err == error.BadValue);
+        // 不确定error.BadValue是否是正确语法
+        // zls暂时没有提示
+    }
+
+    var num_3: anyerror!?u32 = 0;
+    if (num_3) |*value| {
+        if (value.*) |*val| {
+            val.* = 9;
+        }
+    } else |_| {}
+
+    // anyerror!?T 类似于 Result<Option<T>, E>
+    // try std.testing.expect((num_3 catch null) orelse 0 == 9);
+    try std.testing.expect((num_3 catch unreachable).? == 9);
+}
 
 test "1.6 flow control (2/5) loop" {}
 
