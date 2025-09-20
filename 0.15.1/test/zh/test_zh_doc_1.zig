@@ -679,7 +679,7 @@ test "1.6 flow control (1/5) if" {
     // 解构可选类型
     var num_0: ?u32 = null;
     if (num_0) |*val| {
-        val.* += 5;
+        val.* +|= 5;
         print("the val of num_0 = {}\n", .{num_0.?});
     } else {
         print("the val of num_0 is null and it is 0 now\n", .{});
@@ -687,7 +687,7 @@ test "1.6 flow control (1/5) if" {
 
     var num_1: ?u32 = 2;
     if (num_1) |*value| {
-        value.* *= 3;
+        value.* *|= 3;
     }
     assert(num_1.? == 6);
 
@@ -713,7 +713,71 @@ test "1.6 flow control (1/5) if" {
     try std.testing.expect((num_3 catch unreachable).? == 9);
 }
 
-test "1.6 flow control (2/5) loop" {}
+test "1.6 flow control (2/5) loop" {
+    const vec_0: @Vector(5, u32) = .{ 1, 2, 3, 4, 5 };
+    const sum_0: u32 = @reduce(.Add, vec_0);
+
+    var array_1: [5]u32 = .{ 1, 2, 3, 4, 5 };
+    var sum_1: u32 = 0;
+    for (&array_1) |*i| {
+        i.* *|= 2;
+        sum_1 +|= i.*;
+    }
+
+    assert(sum_0 * 2 == sum_1);
+
+    const array_2: [5]u32 = .{ 3, 6, 9, 12, 15 };
+    for (&array_2, 0..) |value, index| {
+        println_fn("value.pow(index)", std.math.pow(u32, value, @as(u32, @intCast(index))), NORMAL_PRINTLN);
+    }
+
+    var count_1: u32 = 0;
+    outer: for (1..9) |_| {
+        for (1..6) |_| {
+            count_1 +|= 1;
+            break :outer;
+        }
+    }
+
+    assert(count_1 == 1);
+    // println_fn("count_1", count_1, NORMAL_PRINTLN);
+
+    var count_2: u32 = 0;
+    outer: for (1..9) |_| {
+        for (1..6) |_| {
+            count_2 +|= 1;
+            continue :outer;
+        }
+    }
+    assert(count_2 == 8);
+    // println_fn("count_2", count_2, NORMAL_PRINTLN);
+
+    // inline for 会将for展开，内部的所有值和捕获的值都必须在编译器已知
+    const nums: [3]u32 = .{ 1, 2, 3 };
+    var sum_2: usize = 0;
+    inline for (nums) |i| {
+        const ZXY = switch (i) {
+            1 => u16, // 3
+            2 => u32, // 3
+            3 => usize, // 5
+            else => unreachable,
+        };
+        sum_2 += @typeName(ZXY).len;
+    }
+
+    assert(sum_2 == 11);
+
+    var sum_3: u32 = 0;
+    while (sum_3 <= 10) : (sum_3 += 1) {
+        _ = "do nothing";
+    }
+
+    // while 可以作为表达式使用
+    // return while () : () {}
+    // 同样可以使用continue : ,break :
+    // 同样可以使用inline，同inline for的要求
+    // 同样可以解构可选类型
+}
 
 test "1.6 flow control (3/5) switch" {}
 
