@@ -1,6 +1,7 @@
 const std = @import("std");
 const print = std.debug.print;
 const assert = std.debug.assert;
+const expect = std.testing.expect;
 
 const ANY_PRINTLN: bool = true;
 const NORMAL_PRINTLN: bool = false;
@@ -387,8 +388,6 @@ test "1.3 (3/8) advance type: pointer" {
     }
 
     // volatile
-    const expect = std.testing.expect;
-
     const mmio_ptr: *volatile u8 = @ptrFromInt(0x12345678);
     try expect(@TypeOf(mmio_ptr) == *volatile u8);
 
@@ -846,6 +845,36 @@ test "1.6 flow control (5/5) unreachable" {
     // 从而进行对代码的优化
 }
 
-test "1.7 selectable type" {}
+test "1.7 selectable type" {
+    const normal_int: i32 = 1234;
+    var optional_int: ?i32 = 5678; // null
+    optional_int.? = normal_int;
 
-test "1.8 error handling" {}
+    // 编译期反射或取类型信息
+    try comptime expect(@typeInfo(@TypeOf(optional_int)).optional.child == i32);
+}
+
+test "1.8 error handling" {
+    const FileOpenError = error{
+        FileNotFound, // 没找到
+        AccessDenied, // 没权限
+        OutOfMemory, // 内存不够
+    };
+
+    const AllocationError = error{
+        OutOfMemory,
+    };
+
+    const err_0 = error.FileNotFound;
+
+    _ = .{ FileOpenError, AllocationError, err_0 catch 0 };
+    // catch to avoid [error set is discarded]
+
+    // 尽量避免使用anyerror，应当使用特定的error
+    //
+    // catch 为如果发生错误则提供一个默认值
+    //
+    // 相比起rust
+    // try      类似于 .unwrap()
+    // catch    类似于 .unwrap_or_else(f) 但是提供一个值，而不是直接报错
+}
