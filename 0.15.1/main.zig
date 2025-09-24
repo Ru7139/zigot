@@ -1,7 +1,8 @@
 const std = @import("std");
-const test_file = @import("test_zh_doc.zig");
 
-const print = std.debug.print;
+const expect = std.testing.expect;
 const assert = std.debug.assert;
+const print = std.debug.print;
+const mem_euqal = std.mem.eql;
 
 pub fn main() !void {}
