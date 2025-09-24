@@ -53,10 +53,13 @@ test "2.1 type convert" {
     const buf_4_b: u32 = @bitCast(buf_4_a);
     assert(buf_4_b == 4294967171);
 
-    var buf_5_a: u32 = undefined;
-
-    const buf_5_b: u32 = @alignCast(buf_5_a);
-    display_it_print_ln(buf_5_b);
+    const buf_5_a: [4]u8 = .{ 0b0000_0001, 0b0000_0010, 0b0000_0011, 0b0000_0100 };
+    var buf_5_b: u32 = undefined;
+    const ptr_5_a: *const [4]u8 = &buf_5_a;
+    const ptr_5_b: *u32 = @ptrCast(@alignCast(@constCast(ptr_5_a)));
+    buf_5_b = ptr_5_b.*;
+    assert(buf_5_b == 67305985);
+    assert(buf_5_b == 0b0000_0100_0000_0011_0000_0010_0000_0001);
 }
 
 test "2.2 memory management" {}
