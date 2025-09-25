@@ -78,6 +78,11 @@ fn find_Q1_combination(allocator: std.mem.Allocator, comptime T: type, array: []
     // 如果有负数存在，则应该删除continue那里
     //
     // 理由是正整数存在着下限，若大于则不可能通过相加而获得
+
+    comptime {
+        if (@typeName(T)[0] != 'u') @compileError("find_Q1_combination only accepts unsigned integer types.");
+    }
+
     var hmap = std.hash_map.AutoHashMap(T, usize).init(allocator);
     defer hmap.deinit();
 
