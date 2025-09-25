@@ -116,6 +116,112 @@ test "2.2 memory management" {
         const bytes_smpA = try allocator_smpA.alloc(u8, 100);
         defer allocator_smpA.free(bytes_smpA);
     }
+
+    {
+        // FixedBufferAllocator
+        // 固定大小的内存缓冲区，无法扩容
+        // 其本身不是线程安全的，但可以使用ThreadSafteAllocator进行包裹
+        //
+
+        var buffer: [1000]u8 = undefined;
+        var fba = std.heap.FixedBufferAllocator.init(&buffer);
+
+        const allocator = fba.allocator();
+        const memory = try allocator.alloc(u8, 100);
+        defer allocator.free(memory);
+    }
+
+    {
+        // AreanaAllocator
+        // 这个分配器的特点是可以多次请求内存，但无需每次使用完时进行free操作
+        // 可以用deinit直接一次回收所有粉发出去的内存
+        // 如果一个程序是一个命令行程序，或没有特别的循环模式
+        // 例如web server或游戏事件循环之类的，推荐使用这个
+        //
+
+        var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+        const allocator = gpa.allocator();
+
+        defer {
+            const deinit_status = gpa.deinit();
+            if (deinit_status == .leak) @panic("test fail");
+        }
+
+        var arena = std.heap.ArenaAllocator.init(allocator);
+        defer arena.deinit();
+
+        const arena_allocator = arena.allocator();
+
+        _ = try arena_allocator.alloc(u8, 1);
+        _ = try arena_allocator.alloc(u8, 10);
+        _ = try arena_allocator.alloc(u8, 100);
+    }
+
+    {
+        // c_allocator 与 C 的完全一样
+        // 有一个变体是raw_c_allocator
+        // 区别在于c_allowcator可能会调用alloc_aligned，而不是malloc
+        const allocator = std.heap.c_allocator;
+        const num = try allocator.alloc(u8, 1);
+        defer allocator.free(num);
+    }
+
+    {
+        // page_allocator
+        // 最基本的分配器，仅仅支持了不同系统的分页申请调用
+        // 每次执行分配时，都会向操作系统申请整个内存页面
+        // 单个字节的分配可能会使剩下数千的字节无法使用
+        // （现代系统页大小最小为4K，但有些还支持2M和1G的页）
+        // 由于涉及系统调用，他的速度很慢，但是好处是线程安全并且无锁
+        //
+
+        const allocator = std.heap.page_allocator;
+        const memory = try allocator.alloc(u8, 100);
+        defer allocator.free(memory);
+    }
+
+    {
+        // StackFallbackAllocator
+        // 会尽可能使用stack上的内存，如果请求的内存超过了可用的栈空间
+        // 会回退到事先制定好的分配器，即堆内存
+        //
+
+        var stack_alloc = std.heap.stackFallback(256 * @sizeOf(u8), std.heap.page_allocator);
+
+        const stack_allocator = stack_alloc.get();
+        const memory = try stack_allocator.alloc(u8, 100);
+        defer stack_allocator.free(memory);
+    }
+
+    {
+        // MemoryPool
+        // 内存池--对象池，在预先分配的内存块中
+        // 当程序需要创建新的对象时，会从池中取出一个已经分配好的内存块
+        // 而不是直接从操作系统中申请
+        // 当对象不再需要内存时，内存会返回到池中，而不肆释放回操作系统
+        //
+        // 通过减少使用系统调用，提高内存分配效率，同时减少内存碎片
+        // 缺点是如果内存池设置地过大或过小，可能会导致内存的不足或浪费
+        //
+
+        var pool = std.heap.MemoryPool(u32).init(std.heap.page_allocator);
+        defer pool.deinit();
+
+        const nums1 = try pool.create();
+        const nums2 = try pool.create();
+        const nums3 = try pool.create();
+
+        pool.destroy(nums1);
+
+        const nums4 = try pool.create();
+
+        _ = .{ nums2, nums3, nums4 };
+    }
+
+    // 可以自己实现Allocator的接口
+    // 需要仔细阅读 std/mem.zig
+    // 提供allocFn和resizeFn
+    // 参考std/heap.zig和std.heap.DebugAllocator
 }
 
 test "2.3 comptime" {}
