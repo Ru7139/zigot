@@ -73,6 +73,11 @@ fn give_the_Q1_array(allocator: std.mem.Allocator, arr_len: usize, first_value: 
 }
 
 fn find_Q1_combination(allocator: std.mem.Allocator, comptime T: type, array: []T, target: T) ![2]usize {
+    // 要求不存在负数
+    // 这个算法是为两个正整数相加而设计的
+    // 如果有负数存在，则应该删除continue那里
+    //
+    // 理由是正整数存在着下限，若大于则不可能通过相加而获得
     var hmap = std.hash_map.AutoHashMap(T, usize).init(allocator);
     defer hmap.deinit();
 
