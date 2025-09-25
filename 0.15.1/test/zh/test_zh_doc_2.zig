@@ -60,9 +60,63 @@ test "2.1 type convert" {
     buf_5_b = ptr_5_b.*;
     assert(buf_5_b == 67305985);
     assert(buf_5_b == 0b0000_0100_0000_0011_0000_0010_0000_0001);
+
+    // 各种显式强制转换
+    // @enumFromInt(integer: anytype)
+    // @errorCast(value: anytype)
+    // @floatCast(value: anytype)
+    // @floatFromInt(int: anytype)
+    // @intCast(int: anytype)
+    // @intfrom____
+    // @ptrFromInt(address: usize)
+    // @ptrCast(value: anytype)
+    // @truncate(integer: anytype)
 }
 
-test "2.2 memory management" {}
+test "2.2 memory management" {
+    {
+        // DebugAllocator
+        // 在debug模式下使用这个分配器
+        // 线程安全检查，安全检查，内存泄漏检查等特性，均可以手动配置是否开启
+        var gpa = std.heap.DebugAllocator(.{}){};
+        const allocator = gpa.allocator();
+
+        defer {
+            const deinit_status = gpa.deinit(); // 尝试进行 deinit 操作
+            if (deinit_status == .leak) @panic("test fail"); // 检查是否发生内存泄漏
+        }
+
+        const bytes = try allocator.alloc(u8, 100); // 申请内存
+        defer allocator.free(bytes); // 延后释放内存
+    }
+
+    {
+        // SmpAllocator 转为ReleaseFast优化的分配器，启用多线程
+        // 这个分配器是个单例，使用全局状态，整个过程只应实体化一个
+        //
+        // 设计思路：
+        //
+        // 1
+        // 每个线程都有独立的freelist，当线程推出时，数据必须可回收。
+        // 由于不知道线程合适退出，所以偶尔需要一个线程尝试回收其他线程的资源
+        //
+        // 2
+        // 超过特定大小的内存分配会直接通过memory mapped（内存映射）实现，且不存储分配元数据。
+        //
+        // 3
+        // 每个分配器操作都会通过线程局部变量检查线程标识符，去确定访问全局状态中的哪个元素，并尝试获取其锁。
+        // 除非被另一个线程分配了同样的ID，否则，都应该成功
+        // 如果发生竞争，线程会移动到下一个线程元数据槽位并重复尝试获取锁的过程
+        //
+        // 4
+        // 通过将线程局部元数据组限制为与CPU数量相同的大小，确保了线程的创建与销毁
+        // 他们会循环使用整个空闲列表集合
+        //
+        const allocator_smpA = std.heap.smp_allocator;
+        const bytes_smpA = try allocator_smpA.alloc(u8, 100);
+        defer allocator_smpA.free(bytes_smpA);
+    }
+}
 
 test "2.3 comptime" {}
 
