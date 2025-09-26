@@ -298,7 +298,25 @@ test "2.3 comptime" {
     assert_u8str_eql(node_b.next.?.name, "Node a");
 }
 
-test "2.4 reflection" {}
+test "2.4 reflection" {
+    // @TypeOf()内可以放多个变量，返回他们的公共可用转换类型
+    assert(comptime_float == @TypeOf(2, 3.14));
+
+    // 无副作用
+    const FUNC = struct {
+        fn foo_ptr_value_add_1(comptime T: type, ptr: *T) T {
+            ptr.* += 1;
+            return ptr.*;
+        }
+    };
+
+    var data: u32 = 0;
+    const type_0 = @TypeOf(FUNC.foo_ptr_value_add_1(u32, &data));
+    try comptime expect(type_0 == u32);
+    try expect(data == 0); // 在这里虽然检测了类型，但并不会执行@TypeOf()内的值
+    // 开发调试 → assert，失败就立即崩溃。
+    // 写测试 → expect，失败让测试框架报告。
+}
 
 test "2.5 asynchronous" {}
 
