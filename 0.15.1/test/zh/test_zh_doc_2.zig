@@ -224,7 +224,19 @@ test "2.2 memory management" {
     // 参考std/heap.zig和std.heap.DebugAllocator
 }
 
-test "2.3 comptime" {}
+test "2.3 comptime" {
+    // 可以在函数的声明中使用
+    // 例如fn add(comptime T: type, a: T, b:T) T {
+    //      return a +| b;
+    // }
+    // 从而实现泛型函数
+    //
+    // comptime可以被使用在声明上
+    // 任何发生运行时对变量的操作将会在编译时报错
+    // 这个值必须在编译时可知
+    comptime var i = 1 + 9;
+    i = 10 * 2;
+}
 
 test "2.4 reflection" {}
 
