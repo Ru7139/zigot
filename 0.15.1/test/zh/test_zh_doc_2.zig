@@ -236,6 +236,66 @@ test "2.3 comptime" {
     // 这个值必须在编译时可知
     comptime var i = 1 + 9;
     i = 10 * 2;
+
+    const FUNC = struct {
+        fn fibonacci(index: u32) u32 {
+            if (index < 2) return index;
+            return fibonacci(index - 1) + fibonacci(index - 2);
+        }
+
+        fn add_comptime(comptime T: type, comptime a: T, comptime b: T) T {
+            return a + b;
+        }
+
+        fn List(comptime T: type) type {
+            return struct {
+                item: []T,
+                len: usize,
+            };
+        }
+    };
+
+    // runtime 时再进行测试
+    // try expect(FUNC.fibonacci(7) == 13);
+    //
+    // comptime期提起进行测试
+    try comptime expect(FUNC.fibonacci(7) == 13);
+    // 在编译器堆栈的嵌套层数最大是 1000，如果超过了这个值
+    // 可以使用@setEvalBranchQuota来修改默认的堆栈嵌套
+
+    // 在容器（container）级别（任何函数之外）
+    // 所有表达式都是隐式的comptime表达式
+    const value_0 = FUNC.add_comptime(u64, 25, 35);
+    _ = value_0;
+
+    // 使用comptime来生成数据结构，无需引入额外语法
+    var buffer: [10]i32 = undefined;
+    var list = FUNC.List(i32){
+        .item = &buffer,
+        .len = 0,
+    };
+
+    buffer = .{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+    list.len = 10;
+    assert(list.item[9] == 0);
+
+    const Node = struct {
+        next: ?*@This(),
+        name: []const u8,
+
+        fn init(name: []const u8) @This() {
+            return @This(){ .next = null, .name = name };
+        }
+    };
+
+    var node_a = Node.init("Node a");
+
+    const node_b = Node{
+        .next = &node_a,
+        .name = "Node b",
+    };
+
+    assert_u8str_eql(node_b.next.?.name, "Node a");
 }
 
 test "2.4 reflection" {}
