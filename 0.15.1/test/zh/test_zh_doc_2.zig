@@ -302,11 +302,39 @@ test "2.4 reflection" {
     // @TypeOf()内可以放多个变量，返回他们的公共可用转换类型
     assert(comptime_float == @TypeOf(2, 3.14));
 
-    // 无副作用
     const FUNC = struct {
+        // 无副作用
         fn foo_ptr_value_add_1(comptime T: type, ptr: *T) T {
             ptr.* += 1;
             return ptr.*;
+        }
+
+        // 获取Int位数
+        fn IntTo_u8_Array(comptime T: type) type {
+            const int_info = @typeInfo(T).int;
+            const bits = int_info.bits;
+            if (bits % 8 != 0) @compileError("bits of the type can not be devide by 8 exactly");
+            return [bits / 8]u8;
+        }
+
+        // 构建新类型
+        fn ExternAlignOne(comptime T: type) type {
+            // 获取类型信息，并断言为Struct，将内存布局改为extern
+            comptime var struct_info = @typeInfo(T).@"struct";
+            struct_info.layout = .@"extern";
+
+            // 复制字段信息，修改每个字段对齐为1，替换字段定义
+            comptime var new_fields = struct_info.fields[0..struct_info.fields.len].*;
+            inline for (&new_fields) |*f| f.alignment = 1;
+            struct_info.fields = &new_fields;
+
+            // 重新构造类型
+            return @Type(.{ .@"struct" = struct_info });
+        }
+
+        // just a true bool
+        fn plus_lower_multiply(a: u8, b: u8, c: u8) bool {
+            return ((a + b + c) < (a * b * c));
         }
     };
 
@@ -316,6 +344,99 @@ test "2.4 reflection" {
     try expect(data == 0); // 在这里虽然检测了类型，但并不会执行@TypeOf()内的值
     // 开发调试 → assert，失败就立即崩溃。
     // 写测试 → expect，失败让测试框架报告。
+    //
+
+    const s_0 = struct {
+        const s_s_0 = struct {
+            a: u8,
+            b: u8,
+        };
+    };
+    const msg_0 = "test_zh_doc_2.test.2.4 reflection.s_0.s_s_0";
+    assert_u8str_eql(@typeName(s_0.s_s_0), msg_0);
+
+    const type_info_0 = @typeInfo(s_0.s_s_0);
+    // 在这里需要使用inline，因为结构体的字段类型中的一个字段是comptime
+    // 使得std.builtin.Type.StructField没有运行时大小
+    // 从而不能在runtime时遍历数组，必须使用inline for在编译器计算
+    inline for (type_info_0.@"struct".fields) |field| {
+        assert(mem_euqal(u8, field.name, "a") or mem_euqal(u8, field.name, "b"));
+        assert(field.type == u8);
+    }
+
+    // 使用反射从类型转换为其他数组
+    const ITu8A = FUNC.IntTo_u8_Array;
+    try std.testing.expectEqual([1]u8, ITu8A(u8));
+    try std.testing.expectEqual([2]u8, ITu8A(u16));
+    try std.testing.expectEqual([3]u8, ITu8A(u24));
+    try std.testing.expectEqual([4]u8, ITu8A(u32));
+
+    // 改变内存对齐
+    const MyStruct = struct {
+        a: u32,
+        b: u32,
+    };
+
+    const NewType = FUNC.ExternAlignOne(MyStruct);
+    try std.testing.expectEqual(4, @alignOf(MyStruct));
+    try std.testing.expectEqual(1, @alignOf(NewType));
+
+    // @hasDecl 在编译期计算
+    const Rocket = struct {
+        index: u16,
+
+        pub const target_code = "New York";
+        var hit_count: u32 = 0;
+        // to modify this variable at runtime
+        // it must be given an explicit fixed-size number type
+    };
+
+    assert(@hasDecl(Rocket, "target_code"));
+    assert(@hasDecl(Rocket, "hit_count"));
+
+    // @hasField
+    assert(@hasField(Rocket, "index"));
+
+    // @field
+    assert(@field(Rocket, "hit_count") == 0);
+
+    // @fieldParentPtr
+    var R1 = Rocket{ .index = 16 };
+    // 通过结构体中的某个字段的指针或取结构体的基指针
+    assert(&R1 == @as(*Rocket, @fieldParentPtr("index", &R1.index)));
+
+    // @call 调用一个函数，和直接用相同
+    assert(@call(.auto, FUNC.plus_lower_multiply, .{ 2, 3, 4 }));
+
+    const type_new_1 = @Type(.{
+        .@"struct" = .{
+            .layout = .auto,
+            .fields = &.{
+                .{
+                    .alignment = 8,
+                    .name = "b",
+                    .type = u64,
+                    .is_comptime = false,
+                    .default_value_ptr = null,
+                },
+                .{
+                    .alignment = 8,
+                    .name = "fc",
+                    .type = f64,
+                    .is_comptime = false,
+                    .default_value_ptr = null,
+                },
+            },
+            .decls = &.{},
+            .is_tuple = false,
+        },
+    });
+
+    const type_tried = type_new_1{
+        .b = 10,
+        .fc = 3.1415926,
+    };
+    assert(type_tried.b == 10);
 }
 
 test "2.5 asynchronous" {}
