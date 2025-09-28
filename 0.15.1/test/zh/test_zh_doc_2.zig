@@ -509,6 +509,79 @@ test "2.7 atomic operation" {
     // std.atomic.spinLoopHint();
 }
 
-test "2.8 ffi interactive with c language" {}
+test "2.8 ffi interactive with c language" {
+    // zig的C交互并不是通过FFI或bindings实现
+    // zig实现了一套C的编译器并且支持将C代码翻译为zig代码
 
-test "2.9 undefined operation" {}
+    // C ABI(Application Binary Interface应用二进制接口)
+    // c_char, c_short, c_int, c_long, c_longlong, c_longdouble
+    // C的void类型，使用anyopaque(大小未知的类型)
+
+    // C Header
+    // 应当仅存在一个@cImport，防止编译器重复调用clang
+    const c_func = @cImport({
+        @cDefine("_NO_CRT_STDIO_INLINE", "1");
+        @cInclude("stdio.h");
+    });
+
+    _ = c_func.printf("this msg is from c_func\n");
+
+    // vcpkg C Lib导入
+    // 增加include搜索目录
+    // exe.addIncludepath(.{.cwd_relative = "PATH:\\PATH\\include"});
+    // 链接C的标准库
+    // exe.linkLibC();
+    // 链接第三方库，gsl库
+    // exe.linkSystemLibrary("gsl");
+
+    // C Translation CLI
+    // zig提供了一个命令行工具 zig translate-c
+    // 可以将C代码翻译为zig的代码并输出
+    // -I 制定include文件的搜索目录
+    // -D 定义预处理宏
+    // -cflags [flags] -- 将任意附加命令行参数传递给clang
+    // -target zig的构建目标三元组，缺省则使用本机作为构建目标
+
+    // 翻译错误
+    // goto，使用位域(bitfields)的结构体，拼接(token-pasting)宏
+    // zig会暂时简单处理一下以继续翻译任务
+    //
+    // 无法被正确翻译的C的struct和union会翻译为opaque{}
+    // 包含opaque类型或者无法被翻译的函数会用extern标记为外部链接函数
+    // 当全局变量，函数原型，宏等无法被转换或处理时，zig会使用@compileError
+
+    // C Marco
+    // 有些C的宏会在函数中被使用，翻译后可能会使宏失去作用，而函数保留其功能
+
+    // C pointer
+    // C的指针可以同时作为单项指针和多项指针使用
+    // 所以，饮引入一种新类型[*c]T，
+    // 1. 支持zig普通指针(*T和[*]T)的全部语法
+    // 2. 可以强制转换为其他的任意指针类型
+    // 3. 如果地址为0，在非freestanding(约等于裸机)目标上，会触发未定义行为
+    // 4. 支持与整数进行强制转换
+    // 5. 支持和整数进行比较
+    // 6. 不支持zig的指针特性，例如align对齐，需要先转换为普通指针再进行操作
+
+    // 可变参数的访问，可以使用@cVaStart, @cVaEnd, @cVaArg, @cVaCopy
+
+    // zig提供了一个工具 glibc-abi-tool，收集了每个版本的glibc的。abilist文件的存储库
+    // zig携带了40多个libc，但仍能保持50MB以下的大小
+}
+
+test "2.9 undefined operation" {
+    // unreachable
+    // 访问越界
+    // 负数转换为无符号整数（可以使用bitcast解决）
+    // 数据截断（一个u16的数大于u8最大的值，但还要往里塞的时候，包括浮点数转换为整数）
+    // 各种数字相加相减时溢出（使用@addWithOverflow等，还有+%等环绕操作）
+    // 左移，右移时出界
+    // 除以0
+    // 精确除法有余数
+    // 尝试解开null，尝试解开union的error
+    // 无效错误码 @errorFromInt
+    // 无效枚举转换 @enumFromInt
+    // 无效错误集合转换 @errorCast
+    // 指针对齐错误（例如0x1就不适合4字节对齐）
+    // 将允许地址为0的指针转换为地址不可为0的指针时（普通指针不允许）
+}
