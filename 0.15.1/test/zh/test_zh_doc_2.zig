@@ -441,9 +441,73 @@ test "2.4 reflection" {
 
 test "2.5 asynchronous" {}
 
-test "2.6 assmbly" {}
+test "2.6 assmbly" {
+    const number = 1;
+    const arg1 = 2;
+    const arg2 = 3;
+    const arg3 = 4;
 
-test "2.7 atomic operation" {}
+    const asm_value: usize = asm volatile (
+        \\ add x0, x0, x1   // x0 = x0 + x1
+        \\ add x0, x0, x2   // x0 = x0 + x2
+        \\ add x0, x0, x3   // x0 = x0 + x3
+        : [ret] "={x0}" (-> usize),
+        : [number] "{x0}" (number),
+          [arg1] "{x1}" (arg1),
+          [arg2] "{x2}" (arg2),
+          [arg3] "{x3}" (arg3),
+        : .{ .x0 = true, .x9 = true });
+
+    assert(asm_value == number + arg1 + arg2 + arg3);
+}
+
+test "2.7 atomic operation" {
+    // 用于某个类型指针进行原子化的读取值
+    // @atomicLoad(comptime T: type, ptr: *const T, comptime ordering: AtomicOrder)
+
+    // 用于原子化的修改值并返回修改前的值
+    // @atomicRmw(comptime T: type, ptr: *T, comptime op: AtomicRmwOp, operand: T, comptime ordering: AtomicOrder)
+
+    // 用于对某个类型指针进行原子化的赋值
+    // @atomicStore(comptime T: type, ptr: *T, value: T, comptime ordering: AtomicOrder)
+
+    // 原子比较与交换操作，如果目标指针式给定值，赋值参数的新值，并返回null，否则仅返回读取值
+    // @cmpxchgWeak(comptime T: type, ptr: *T, expected_value: T, new_value: T, success_order: AtomicOrder, fail_order: AtomicOrder)
+    // @cmpxchgStrong(comptime T: type, ptr: *T, expected_value: T, new_value: T, success_order: AtomicOrder, fail_order: AtomicOrder)
+
+    const RefCount = struct {
+        count: std.atomic.Value(usize),
+        dropFn: *const fn (*RefCount) void,
+
+        const RefCount = @This();
+
+        fn ref(rc: *RefCount) void {
+            _ = rc.count.fetchAdd(1, .monotonic);
+        }
+
+        fn unref(rc: *RefCount) void {
+            if (rc.count.fetchSub(1, .release) == 1) {
+                _ = rc.count.load(.acquire);
+                (rc.dropFn)(rc);
+            }
+        }
+
+        fn noop(rc: *RefCount) void {
+            _ = rc;
+        }
+    };
+
+    var ref_count: RefCount = .{
+        .count = std.atomic.Value(usize).init(4),
+        .dropFn = RefCount.noop,
+    };
+
+    ref_count.ref();
+    ref_count.unref();
+
+    // Signals to the processor that the caller is inside a busy-wait spin-loop.
+    // std.atomic.spinLoopHint();
+}
 
 test "2.8 ffi interactive with c language" {}
 
